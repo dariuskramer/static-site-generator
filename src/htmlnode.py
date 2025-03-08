@@ -18,8 +18,10 @@ value="{self.value}", \
 children={self.children}, \
 props={self.props})"""
 
-    def to_html(self) -> None:
+    def to_html(self):
         raise NotImplementedError
 
-    def props_to_html(self) -> None:
+    def props_to_html(self):
+        if not self.props:
+            return ""
         return reduce(lambda acc, p: acc + f' {p[0]}="{p[1]}"', self.props.items(), "")
