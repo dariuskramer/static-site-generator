@@ -4,8 +4,8 @@ from htmlnode import HTMLNode
 class LeafNode(HTMLNode):
     """A LeafNode is a type of HTMLNode that represents a single HTML tag with no children."""
 
-    def __init__(self, tag: str, value: str, props: dict = None):
-        super().__init__(tag, value, children=None, props=props)
+    def __init__(self, tag: str, value: str, props: dict = {}):
+        super().__init__(tag, value, props=props)
 
     def to_html(self):
         if not self.value:

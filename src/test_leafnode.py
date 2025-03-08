@@ -18,7 +18,7 @@ class TestLeafNode(unittest.TestCase):
         node = LeafNode(tag="p", value="Hello, world!", props={"class": "text"})
         self.assertEqual(node.tag, "p")
         self.assertEqual(node.value, "Hello, world!")
-        self.assertEqual(node.children, None)
+        self.assertEqual(node.children, [])
         self.assertEqual(node.props, {"class": "text"})
 
     def test_to_html_with_tag_and_value(self):
@@ -60,7 +60,7 @@ class TestLeafNode(unittest.TestCase):
         node = LeafNode("a", "Click me")
         self.assertEqual(node.tag, "a")
         self.assertEqual(node.value, "Click me")
-        self.assertEqual(node.props, None)
+        self.assertEqual(node.props, {})
 
     def test_to_html_with_tag_and_value_only(self):
         node = LeafNode("p", "This is a paragraph")

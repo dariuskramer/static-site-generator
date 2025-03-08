@@ -6,8 +6,8 @@ class HTMLNode:
         self,
         tag: str = None,
         value: str = None,
-        children: ["HTMLNode"] = None,
-        props: dict = None,
+        children: ["HTMLNode"] = [],
+        props: dict = {},
     ):
         self.tag, self.value, self.children, self.props = tag, value, children, props
 
@@ -22,6 +22,4 @@ props={self.props})"""
         raise NotImplementedError
 
     def props_to_html(self):
-        if not self.props:
-            return ""
         return reduce(lambda acc, p: acc + f' {p[0]}="{p[1]}"', self.props.items(), "")
