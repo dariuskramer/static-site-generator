@@ -42,7 +42,7 @@ class TestLeafNode(unittest.TestCase):
 
     def test_to_html_without_value_raises_error(self):
         with self.assertRaises(ValueError):
-            LeafNode(tag="p", value="").to_html()
+            _ = LeafNode(tag="p", value="").to_html()
 
     def test_to_html_with_empty_props(self):
         node = LeafNode(tag="span", value="Simple text", props={})
@@ -72,16 +72,10 @@ class TestLeafNode(unittest.TestCase):
         expected = "Raw text"
         self.assertEqual(node.to_html(), expected)
 
-    def test_to_html_with_no_value_raises_error(self):
-        node = LeafNode("p", None)
-        with self.assertRaises(ValueError) as context:
-            node.to_html()
-            self.assertEqual(str(context.exception), "all leaf must have a value!")
-
     def test_to_html_with_empty_value_raises_error(self):
         node = LeafNode("p", "")
         with self.assertRaises(ValueError) as context:
-            node.to_html()
+            _ = node.to_html()
             self.assertEqual(str(context.exception), "all leaf must have a value!")
 
     def test_to_html_with_no_props(self):
@@ -89,5 +83,6 @@ class TestLeafNode(unittest.TestCase):
         expected = "<span>Inline text</span>"
         self.assertEqual(node.to_html(), expected)
 
-    if __name__ == "__main__":
-        unittest.main()
+
+if __name__ == "__main__":
+    _ = unittest.main()

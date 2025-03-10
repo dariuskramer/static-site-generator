@@ -1,4 +1,6 @@
+from collections.abc import Sequence
 from functools import reduce
+from typing import override
 
 from htmlnode import HTMLNode
 
@@ -9,9 +11,15 @@ class ParentNode(HTMLNode):
     Any HTML node that's not "leaf" node (i.e. it has children) is a "parent" node.
     """
 
-    def __init__(self, tag: str, children: [HTMLNode], props: dict = None):
-        super().__init__(tag=tag, value=None, children=children, props=props)
+    def __init__(
+        self,
+        tag: str,
+        children: Sequence[HTMLNode],
+        props: dict[str, str] | None = None,
+    ):
+        super().__init__(tag=tag, value="", children=children, props=props)
 
+    @override
     def to_html(self):
         if not self.tag:
             raise ValueError("tag is required!")

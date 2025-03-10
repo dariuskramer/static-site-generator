@@ -21,9 +21,10 @@ class TestParentNode(unittest.TestCase):
         )
 
     def test_to_html_with_children(self):
-        child_node = LeafNode("span", "child")
-        parent_node = ParentNode("div", [child_node])
-        self.assertEqual(parent_node.to_html(), "<div><span>child</span></div>")
+        children = [LeafNode("span", "child1"), LeafNode("span", "child2")]
+        node = ParentNode("div", children)
+        expected = "<div><span>child1</span><span>child2</span></div>"
+        self.assertEqual(node.to_html(), expected)
 
     def test_to_html_with_grandchildren(self):
         grandchild_node = LeafNode("b", "grandchild")
@@ -58,14 +59,18 @@ class TestParentNode(unittest.TestCase):
         expected_html = '<div class="content"><p>Styled text</p></div>'
         self.assertEqual(node.to_html(), expected_html)
 
-    def test_to_html_without_tag_raises_error(self):
-        children = [LeafNode(tag="p", value="No tag")]
-        with self.assertRaises(ValueError):
-            ParentNode(tag=None, children=children).to_html()
+    def test_to_html_with_no_tag_raises_error(self):
+        children = [LeafNode("span", "child1")]
+        node = ParentNode("", children)
+        with self.assertRaises(ValueError) as context:
+            _ = node.to_html()
+        self.assertEqual(str(context.exception), "tag is required!")
 
-    def test_to_html_without_children_raises_error(self):
-        with self.assertRaises(ValueError):
-            ParentNode(tag="div", children=[]).to_html()
+    def test_to_html_with_no_children_raises_error(self):
+        node = ParentNode("div", [])
+        with self.assertRaises(ValueError) as context:
+            _ = node.to_html()
+        self.assertEqual(str(context.exception), "children is required!")
 
     def test_init_with_tag_and_children(self):
         children = [LeafNode("span", "child1"), LeafNode("span", "child2")]
@@ -82,12 +87,6 @@ class TestParentNode(unittest.TestCase):
         self.assertEqual(node.children, children)
         self.assertEqual(node.props, props)
 
-    def test_to_html_with_children(self):
-        children = [LeafNode("span", "child1"), LeafNode("span", "child2")]
-        node = ParentNode("div", children)
-        expected = "<div><span>child1</span><span>child2</span></div>"
-        self.assertEqual(node.to_html(), expected)
-
     def test_to_html_with_children_and_props(self):
         children = [LeafNode("span", "child1"), LeafNode("span", "child2")]
         props = {"class": "container"}
@@ -103,24 +102,12 @@ class TestParentNode(unittest.TestCase):
         expected = "<section><p>outer1</p><div><span>inner1</span><span>inner2</span></div></section>"
         self.assertEqual(outer_node.to_html(), expected)
 
-    def test_to_html_with_no_tag_raises_error(self):
-        children = [LeafNode("span", "child1")]
-        node = ParentNode(None, children)
-        with self.assertRaises(ValueError) as context:
-            node.to_html()
-        self.assertEqual(str(context.exception), "tag is required!")
-
-    def test_to_html_with_no_children_raises_error(self):
+    def test_to_html_with_empty_children_raises_error(self):
         node = ParentNode("div", [])
         with self.assertRaises(ValueError) as context:
-            node.to_html()
+            _ = node.to_html()
         self.assertEqual(str(context.exception), "children is required!")
 
-    def test_to_html_with_empty_children_raises_error(self):
-        node = ParentNode("div", None)
-        with self.assertRaises(ValueError) as context:
-            node.to_html()
-        self.assertEqual(str(context.exception), "children is required!")
 
-    if __name__ == "__main__":
-        unittest.main()
+if __name__ == "__main__":
+    _ = unittest.main()

@@ -31,5 +31,6 @@ class TestTextNode(unittest.TestCase):
         node2 = TextNode("This is a text node", TextType.BOLD)
         self.assertNotEqual(node, node2)
 
-    if __name__ == "__main__":
-        unittest.main()
+
+if __name__ == "__main__":
+    _ = unittest.main()

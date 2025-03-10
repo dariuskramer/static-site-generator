@@ -9,12 +9,12 @@ class TestHTMLNode(unittest.TestCase):
         self.assertIsNone(node.tag)
         self.assertIsNone(node.value)
         self.assertIsNotNone(node.children)
-        self.assertListEqual(node.children, [])
+        self.assertListEqual(list(node.children), [])
         self.assertIsNotNone(node.props)
         self.assertDictEqual(node.props, {})
 
     def test_initialization_with_values(self):
-        children = [HTMLNode(tag="div", value="Hello")]
+        children = [HTMLNode(tag="div", value="Hello", children=None, props=None)]
         props = {"class": "container", "id": "main"}
 
         node = HTMLNode(tag="span", value="Test", children=children, props=props)
@@ -86,7 +86,8 @@ class TestHTMLNode(unittest.TestCase):
     def test_to_html_raises_not_implemented_error(self):
         node = HTMLNode()
         with self.assertRaises(NotImplementedError):
-            node.to_html()
+            _ = node.to_html()
 
-    if __name__ == "__main__":
-        unittest.main()
+
+if __name__ == "__main__":
+    _ = unittest.main()
