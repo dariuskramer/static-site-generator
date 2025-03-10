@@ -11,6 +11,17 @@ class LeafNode(HTMLNode):
         super().__init__(tag, value, props=props)
 
     @override
+    def __eq__(self, other: object):
+        if not isinstance(other, HTMLNode):
+            return NotImplemented
+        return (
+            self.tag == other.tag
+            and self.value == other.value
+            and self.children == other.children
+            and self.props == other.props
+        )
+
+    @override
     def to_html(self) -> str:
         if not self.value:
             raise ValueError("all leaf must have a value!")

@@ -4,10 +4,10 @@ from typing import override
 
 
 class HTMLNode:
-    tag: str
-    value: str
-    children: Sequence["HTMLNode"]
-    props: dict[str, str]
+    tag: str | None
+    value: str | None
+    children: Sequence["HTMLNode"] | None
+    props: dict[str, str] | None
 
     def __init__(
         self,
@@ -16,10 +16,10 @@ class HTMLNode:
         children: Sequence["HTMLNode"] | None = None,
         props: dict[str, str] | None = None,
     ):
-        self.tag = tag or ""
-        self.value = value or ""
-        self.children = children or []
-        self.props = props or {}
+        self.tag = tag
+        self.value = value
+        self.children = children
+        self.props = props
 
     @override
     def __repr__(self):
@@ -33,4 +33,5 @@ props={self.props})"""
         raise NotImplementedError
 
     def props_to_html(self) -> str:
-        return reduce(lambda acc, p: acc + f' {p[0]}="{p[1]}"', self.props.items(), "")
+        props = self.props or {}
+        return reduce(lambda acc, p: acc + f' {p[0]}="{p[1]}"', props.items(), "")

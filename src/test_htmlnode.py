@@ -8,10 +8,8 @@ class TestHTMLNode(unittest.TestCase):
         node = HTMLNode()
         self.assertIsNone(node.tag)
         self.assertIsNone(node.value)
-        self.assertIsNotNone(node.children)
-        self.assertListEqual(list(node.children), [])
-        self.assertIsNotNone(node.props)
-        self.assertDictEqual(node.props, {})
+        self.assertIsNone(node.children)
+        self.assertIsNone(node.props)
 
     def test_initialization_with_values(self):
         children = [HTMLNode(tag="div", value="Hello", children=None, props=None)]
@@ -66,7 +64,7 @@ class TestHTMLNode(unittest.TestCase):
 
     def test_repr_with_children_and_props(self):
         node = HTMLNode("a", "link", [HTMLNode()], {"href": "https://example.com"})
-        expected = "HTMLNode(tag=a, value=\"link\", children=[HTMLNode(tag=None, value=\"None\", children=[], props={})], props={'href': 'https://example.com'})"
+        expected = "HTMLNode(tag=a, value=\"link\", children=[HTMLNode(tag=None, value=\"None\", children=None, props=None)], props={'href': 'https://example.com'})"
         self.assertEqual(repr(node), expected)
 
     def test_props_to_html_with_empty_props(self):

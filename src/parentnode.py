@@ -17,7 +17,7 @@ class ParentNode(HTMLNode):
         children: Sequence[HTMLNode],
         props: dict[str, str] | None = None,
     ):
-        super().__init__(tag=tag, value="", children=children, props=props)
+        super().__init__(tag=tag, value=None, children=children, props=props)
 
     @override
     def to_html(self):
