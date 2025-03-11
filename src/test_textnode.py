@@ -24,7 +24,7 @@ class TestTextNode(unittest.TestCase):
     def test_url_is_none(self):
         node = TextNode("url node", TextType.LINK)
         self.assertIsNone(node.url)
-        expected = "TextNode(url node, link, None)"
+        expected = 'TextNode("url node", link, None)'
         self.assertEqual(expected, repr(node))
 
     def test_neq_text_type(self):
