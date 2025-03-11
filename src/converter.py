@@ -98,6 +98,9 @@ def _split_nodes_func(
 
             start_string = end_match
 
+        if start_string < len(node.text):  # text remaining at the end
+            new_nodes.append(TextNode(node.text[start_string:], node.text_type))
+
     return new_nodes
 
 
