@@ -1,6 +1,6 @@
 import unittest
 
-from inline import text_node_to_html_node
+from markdown import text_node_to_html_node
 from textnode import TextNode, TextType
 
 
