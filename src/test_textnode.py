@@ -1,6 +1,6 @@
 import unittest
 
-from converter import text_node_to_html_node
+from inline import text_node_to_html_node
 from textnode import TextNode, TextType
 
 
