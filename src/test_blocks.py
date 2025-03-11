@@ -1,6 +1,6 @@
 import unittest
 
-from blocks import markdown_to_blocks
+from blocks import BlockType, markdown_to_blocks, block_to_block_type
 
 
 class TestMarkdownToBlocks(unittest.TestCase):
@@ -99,6 +99,212 @@ Ceci est un autre paragraphe.
 > Une citation"""
         expected = ["# Titre", "- Une liste\n- Avec des éléments", "> Une citation"]
         self.assertEqual(markdown_to_blocks(markdown), expected)
+
+
+class TestBlockToBlockType(unittest.TestCase):
+    def test_with_empty_line(self):
+        markdown = ""
+        result = block_to_block_type(markdown)
+        expected = BlockType.PARAGRAPH
+        self.assertEqual(result, expected)
+
+    def test_heading_valid(self):
+        markdown = "# heading 1"
+        result = block_to_block_type(markdown)
+        expected = BlockType.HEADING
+        self.assertEqual(result, expected)
+
+        markdown = "## heading 2"
+        result = block_to_block_type(markdown)
+        expected = BlockType.HEADING
+        self.assertEqual(result, expected)
+
+        markdown = "### heading 3"
+        result = block_to_block_type(markdown)
+        expected = BlockType.HEADING
+        self.assertEqual(result, expected)
+
+        markdown = "#### heading 4"
+        result = block_to_block_type(markdown)
+        expected = BlockType.HEADING
+        self.assertEqual(result, expected)
+
+        markdown = "##### heading 5"
+        result = block_to_block_type(markdown)
+        expected = BlockType.HEADING
+        self.assertEqual(result, expected)
+
+        markdown = "###### heading 6"
+        result = block_to_block_type(markdown)
+        expected = BlockType.HEADING
+        self.assertEqual(result, expected)
+
+    def test_heading_invalid(self):
+        markdown = "####### heading 7"
+        result = block_to_block_type(markdown)
+        expected = BlockType.PARAGRAPH
+        self.assertEqual(result, expected)
+
+        markdown = "######## heading 8"
+        result = block_to_block_type(markdown)
+        expected = BlockType.PARAGRAPH
+        self.assertEqual(result, expected)
+
+    def test_code_block_empty(self):
+        markdown = "```\n```"
+        result = block_to_block_type(markdown)
+        expected = BlockType.CODE
+        self.assertEqual(result, expected)
+
+    def test_code_block_single(self):
+        markdown = "```\n"
+        result = block_to_block_type(markdown)
+        expected = BlockType.PARAGRAPH
+        self.assertEqual(result, expected)
+
+        markdown = "```"
+        result = block_to_block_type(markdown)
+        expected = BlockType.PARAGRAPH
+        self.assertEqual(result, expected)
+
+    def test_code_block_basic(self):
+        markdown = """\
+```
+def example():
+    print("Hello, World!")
+```
+"""
+        result = block_to_block_type(markdown)
+        expected = BlockType.CODE
+        self.assertEqual(result, expected)
+
+    def test_code_block_multilines(self):
+        markdown = """\
+```
+def example():
+    print("Hello, World!")
+
+def example2():
+    print("Hello, World!")
+```
+"""
+        result = block_to_block_type(markdown)
+        expected = BlockType.CODE
+        self.assertEqual(result, expected)
+
+    def test_quote_single_line(self):
+        markdown = """\
+> test
+"""
+        result = block_to_block_type(markdown)
+        expected = BlockType.QUOTE
+        self.assertEqual(result, expected)
+
+    def test_quote_multilines(self):
+        markdown = """\
+> test
+> test2
+"""
+        result = block_to_block_type(markdown)
+        expected = BlockType.QUOTE
+        self.assertEqual(result, expected)
+
+    def test_quote_invalid_in_between(self):
+        markdown = """\
+> test
+test2
+> test3
+"""
+        result = block_to_block_type(markdown)
+        expected = BlockType.PARAGRAPH
+        self.assertEqual(result, expected)
+
+    def test_quote_invalid_in_between_with_space(self):
+        markdown = """\
+> test
+ > test2
+> test3
+"""
+        result = block_to_block_type(markdown)
+        expected = BlockType.PARAGRAPH
+        self.assertEqual(result, expected)
+
+    def test_unordered_list_single_line(self):
+        markdown = """\
+- test
+"""
+        result = block_to_block_type(markdown)
+        expected = BlockType.UNORDERED_LIST
+        self.assertEqual(result, expected)
+
+    def test_unordered_list_multilines(self):
+        markdown = """\
+- test
+- test2
+"""
+        result = block_to_block_type(markdown)
+        expected = BlockType.UNORDERED_LIST
+        self.assertEqual(result, expected)
+
+    def test_unordered_list_invalid_in_between(self):
+        markdown = """\
+- test
+test2
+- test3
+"""
+        result = block_to_block_type(markdown)
+        expected = BlockType.PARAGRAPH
+        self.assertEqual(result, expected)
+
+    def test_unordered_list_invalid_in_between_with_space(self):
+        markdown = """\
+- test
+ - test2
+- test3
+"""
+        result = block_to_block_type(markdown)
+        expected = BlockType.PARAGRAPH
+        self.assertEqual(result, expected)
+
+    def test_ordered_list_block(self):
+        markdown = """\
+1. First item
+2. Second item
+3. Third item
+"""
+        result = block_to_block_type(markdown)
+        expected = BlockType.ORDERED_LIST
+        self.assertEqual(result, expected)
+
+    def test_ordered_list_invalid(self):
+        markdown = """\
+1. First item
+3. Second item
+2. Third item
+"""
+        result = block_to_block_type(markdown)
+        expected = BlockType.PARAGRAPH
+        self.assertEqual(result, expected)
+
+    def test_mixed_content_block(self):
+        markdown = """\
+- Item 1
+> This is a quote.
+1. First item
+"""
+        result = block_to_block_type(markdown)
+        expected = BlockType.PARAGRAPH
+        self.assertEqual(result, expected)
+
+    def test_partial_code_block(self):
+        markdown = """\
+```
+def example():
+    print("Hello, World!")
+"""
+        result = block_to_block_type(markdown)
+        expected = BlockType.PARAGRAPH
+        self.assertEqual(result, expected)
 
 
 if __name__ == "__main__":
