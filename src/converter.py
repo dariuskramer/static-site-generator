@@ -114,3 +114,18 @@ def split_nodes_link(old_nodes: list[TextNode]) -> list[TextNode]:
     return _split_nodes_func(
         old_nodes, RE_LINKS_PATTERN, extract_markdown_links, TextType.LINK
     )
+
+
+def text_to_textnodes(text: str) -> list[TextNode]:
+    nodes: list[TextNode] = [TextNode(text, TextType.TEXT)]
+    # CODE
+    nodes = split_nodes_delimiter(nodes, "`", TextType.CODE)
+    # BOLD
+    nodes = split_nodes_delimiter(nodes, "**", TextType.BOLD)
+    # ITALIC
+    nodes = split_nodes_delimiter(nodes, "_", TextType.ITALIC)
+    # IMAGE
+    nodes = split_nodes_image(nodes)
+    # LINK
+    nodes = split_nodes_link(nodes)
+    return nodes
