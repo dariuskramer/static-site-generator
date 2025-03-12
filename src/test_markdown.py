@@ -12,6 +12,7 @@ from markdown import (
     block_to_html_unordered_list_node,
     extract_markdown_images,
     extract_markdown_links,
+    extract_title,
     markdown_to_blocks,
     markdown_to_html_node,
     split_nodes_delimiter,
@@ -235,6 +236,44 @@ class TestExtractMarkdownLinks(unittest.TestCase):
             ("to youtube", "https://www.youtube.com/@bootdotdev"),
         ]
         self.assertListEqual(result, expected)
+
+
+class TestExtractTitle(unittest.TestCase):
+    def test_title(self):
+        text = """
+# Tolkien Fan Club
+
+![JRR Tolkien sitting](/images/tolkien.png)
+
+## What's the deal?
+Here's the deal, **I like Tolkien**.
+
+## Quotes
+> "I am in fact a Hobbit in all but size."
+>
+> -- J.R.R. Tolkien
+"""
+        result = extract_title(text)
+        expected = "Tolkien Fan Club"
+        self.assertEqual(result, expected)
+
+    def test_missing_title(self):
+        text = """
+## Tolkien Fan Club
+
+![JRR Tolkien sitting](/images/tolkien.png)
+
+## What's the deal?
+Here's the deal, **I like Tolkien**.
+
+## Quotes
+> "I am in fact a Hobbit in all but size."
+>
+> -- J.R.R. Tolkien
+"""
+        with self.assertRaises(Exception) as context:
+            _ = extract_title(text)
+        self.assertIn("h1 header missing", str(context.exception))
 
 
 class TestSplitNodesImage(unittest.TestCase):
@@ -811,7 +850,7 @@ class TestBlockToHtmlQuoteNode(unittest.TestCase):
 > This is a quote
 """
         result = block_to_html_quote_node(markdown)
-        expected = "<blockquote><p>This is a quote</p></blockquote>"
+        expected = "<blockquote>This is a quote</blockquote>"
         self.assertEqual(result.to_html(), expected)
 
     def test_block_to_html_quote_node_multi_lines(self):
@@ -821,7 +860,7 @@ class TestBlockToHtmlQuoteNode(unittest.TestCase):
 > quote
 """
         result = block_to_html_quote_node(markdown)
-        expected = "<blockquote><p>This is a multilines quote</p></blockquote>"
+        expected = "<blockquote>This is a multilines quote</blockquote>"
         self.assertEqual(result.to_html(), expected)
 
     @unittest.skip("what behavior do I want?")
@@ -832,7 +871,7 @@ class TestBlockToHtmlQuoteNode(unittest.TestCase):
 > This is a quote with an empty line in between
 """
         result = block_to_html_quote_node(markdown)
-        expected = "<blockquote><p>This is a quote with an empty line in between\nThis is a quote with an empty line in between</p></blockquote>"
+        expected = "<blockquote>This is a quote with an empty line in between\nThis is a quote with an empty line in between</blockquote>"
         self.assertEqual(result.to_html(), expected)
 
     def test_block_to_html_quote_node_with_inline(self):
@@ -845,13 +884,13 @@ class TestBlockToHtmlQuoteNode(unittest.TestCase):
 """
         result = block_to_html_quote_node(markdown)
         expected = """\
-<blockquote><p>\
+<blockquote>\
 This is a line with a <b>bold</b> word \
 This is a line with an <i>italic</i> word \
 This is a line with a <code>code</code> word \
 This is a line with an <img alt="obi wan image" src="https://i.imgur.com/fJRm4Vk.jpeg" /> \
 This is a line with a <a href="https://boot.dev">link</a> at the end\
-</p></blockquote>\
+</blockquote>\
 """
         self.maxDiff = None  # pyright: ignore[reportUnannotatedClassAttribute]
         self.assertEqual(result.to_html(), expected)
@@ -1061,7 +1100,7 @@ this is paragraph text
         html = node.to_html()
         self.assertEqual(
             html,
-            "<div><blockquote><p>This is a blockquote block</p></blockquote><p>this is paragraph text</p></div>",
+            "<div><blockquote>This is a blockquote block</blockquote><p>this is paragraph text</p></div>",
         )
 
     def test_code(self):

@@ -8,6 +8,7 @@ import re
 RE_IMAGE_PATTERN = r"!\[([^\[\]]*)\]\(([^\(\)]*)\)"
 RE_LINKS_PATTERN = r"(?<!!)\[([^\[\]]*)\]\(([^\(\)]*)\)"
 RE_HEADING_PATTERN = r"^(#{1,6}) (.+)$"
+RE_TITLE_PATTERN = r"^# (?P<title>.+)$"
 
 
 class BlockType(Enum):
@@ -83,6 +84,15 @@ def extract_markdown_images(text: str) -> list[tuple[str, str]]:
 
 def extract_markdown_links(text: str) -> list[tuple[str, str]]:
     return re.findall(RE_LINKS_PATTERN, text)
+
+
+def extract_title(markdown: str) -> str:
+    match = re.search(RE_TITLE_PATTERN, markdown, re.MULTILINE)
+    if not match:
+        raise Exception("h1 header missing!")
+
+    title = match.group(1)
+    return title
 
 
 def _split_nodes_func(
@@ -204,8 +214,8 @@ def block_to_html_heading_node(block: str) -> ParentNode:
 def block_to_html_quote_node(block: str) -> ParentNode:
     lines = [line.lstrip(">").strip() for line in block.splitlines()]
     quote = " ".join(lines)
-    children = block_to_html_paragraph_node(quote)
-    return ParentNode("blockquote", [children])
+    children = text_to_children(quote)
+    return ParentNode("blockquote", children)
 
 
 def block_to_html_unordered_list_node(block: str) -> ParentNode:
