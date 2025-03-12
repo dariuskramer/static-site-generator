@@ -202,8 +202,8 @@ def block_to_html_heading_node(block: str) -> ParentNode:
 
 
 def block_to_html_quote_node(block: str) -> ParentNode:
-    # quote = "\n".join([line[2:] for line in block.splitlines()])
-    quote = block.replace("> ", "").replace(">", "")
+    lines = [line.lstrip(">").strip() for line in block.splitlines()]
+    quote = " ".join(lines)
     children = block_to_html_paragraph_node(quote)
     return ParentNode("blockquote", [children])
 
