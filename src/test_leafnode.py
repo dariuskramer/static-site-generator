@@ -14,6 +14,13 @@ class TestLeafNode(unittest.TestCase):
             node.to_html(), '<a href="https://www.google.com">Click me!</a>'
         )
 
+    def test_leaf_to_html_img(self):
+        node = LeafNode("img", "Alt text", {"src": "https://i.imgur.com/fJRm4Vk.jpeg"})
+        self.assertEqual(
+            node.to_html(),
+            '<img alt="Alt text" src="https://i.imgur.com/fJRm4Vk.jpeg" />',
+        )
+
     def test_initialization(self):
         node = LeafNode(tag="p", value="Hello, world!", props={"class": "text"})
         self.assertEqual(node.tag, "p")

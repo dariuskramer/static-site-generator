@@ -13,7 +13,7 @@ class LeafNode(HTMLNode):
     @override
     def __eq__(self, other: object):
         if not isinstance(other, HTMLNode):
-            return NotImplemented
+            raise NotImplementedError
         return (
             self.tag == other.tag
             and self.value == other.value
@@ -27,7 +27,14 @@ class LeafNode(HTMLNode):
             raise ValueError("all leaf must have a value!")
         if not self.tag:
             return self.value
-        props = ""
-        if self.props:
-            props = super().props_to_html()
-        return f"<{self.tag}{props}>{self.value}</{self.tag}>"
+
+        props = super().props_to_html()
+        if self.tag == "img":
+            if not self.props or "src" not in self.props:
+                raise ValueError("'src' attribute is required!")
+
+            return f'<{self.tag} alt="{self.value}" {props} />'
+
+        if props:
+            return f"<{self.tag} {props}>{self.value}</{self.tag}>"
+        return f"<{self.tag}>{self.value}</{self.tag}>"

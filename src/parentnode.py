@@ -25,9 +25,10 @@ class ParentNode(HTMLNode):
             raise ValueError("tag is required!")
         if not self.children:
             raise ValueError("children is required!")
-        props = ""
-        if self.props:
-            props = super().props_to_html()
+        #
         # children_to_html = "".join([child.to_html() for child in self.children])
         children_to_html = reduce(lambda acc, c: acc + c.to_html(), self.children, "")
-        return f"<{self.tag}{props}>{children_to_html}</{self.tag}>"
+        if self.props:
+            props = super().props_to_html()
+            return f"<{self.tag} {props}>{children_to_html}</{self.tag}>"
+        return f"<{self.tag}>{children_to_html}</{self.tag}>"

@@ -1,58 +1,66 @@
 import unittest
 
+from leafnode import LeafNode
 from markdown import (
-    text_node_to_html_node,
-    split_nodes_delimiter,
+    BlockType,
+    block_to_block_type,
+    block_to_html_code_node,
+    block_to_html_heading_node,
+    block_to_html_ordered_list_node,
+    block_to_html_paragraph_node,
+    block_to_html_quote_node,
+    block_to_html_unordered_list_node,
     extract_markdown_images,
     extract_markdown_links,
+    markdown_to_blocks,
+    markdown_to_html_node,
+    split_nodes_delimiter,
     split_nodes_image,
     split_nodes_link,
+    textnode_to_htmlnode,
     text_to_textnodes,
 )
-from leafnode import LeafNode
 from textnode import TextNode, TextType
-
-from markdown import BlockType, markdown_to_blocks, block_to_block_type
 
 
 class TestTextNodeToHtmlNode(unittest.TestCase):
     def test_text_type_text(self):
         text_node = TextNode("Hello, world!", TextType.TEXT)
-        tested = text_node_to_html_node(text_node)
+        tested = textnode_to_htmlnode(text_node)
         expected = LeafNode(tag=None, value="Hello, world!")
         self.assertEqual(tested, expected)
 
     def test_text_type_bold(self):
         text_node = TextNode("Bold text", TextType.BOLD)
         expected = LeafNode(tag="b", value="Bold text")
-        self.assertEqual(text_node_to_html_node(text_node), expected)
+        self.assertEqual(textnode_to_htmlnode(text_node), expected)
 
     def test_text_type_italic(self):
         text_node = TextNode("Italic text", TextType.ITALIC)
         expected = LeafNode(tag="i", value="Italic text")
-        self.assertEqual(text_node_to_html_node(text_node), expected)
+        self.assertEqual(textnode_to_htmlnode(text_node), expected)
 
     def test_text_type_code(self):
         text_node = TextNode("Code snippet", TextType.CODE)
         expected = LeafNode(tag="code", value="Code snippet")
-        self.assertEqual(text_node_to_html_node(text_node), expected)
+        self.assertEqual(textnode_to_htmlnode(text_node), expected)
 
     def test_text_type_link(self):
         text_node = TextNode("Click here", TextType.LINK, "https://example.com")
         expected = LeafNode(
             tag="a", value="Click here", props={"href": "https://example.com"}
         )
-        self.assertEqual(text_node_to_html_node(text_node), expected)
+        self.assertEqual(textnode_to_htmlnode(text_node), expected)
 
     def test_text_type_image(self):
         text_node = TextNode(
             "An image", TextType.IMAGE, "https://example.com/image.png"
         )
-        tested = text_node_to_html_node(text_node)
+        tested = textnode_to_htmlnode(text_node)
         expected = LeafNode(
             tag="img",
-            value="",
-            props={"src": "https://example.com/image.png", "alt": "An image"},
+            value="An image",
+            props={"src": "https://example.com/image.png"},
         )
         self.assertEqual(tested, expected)
 
@@ -63,7 +71,7 @@ class TestTextNodeToHtmlNode(unittest.TestCase):
 
         text_node = TextNode("Invalid", InvalidTextType())  # pyright: ignore[reportArgumentType]
         with self.assertRaises(Exception) as context:
-            _ = text_node_to_html_node(text_node)
+            _ = textnode_to_htmlnode(text_node)
         self.assertIn("No case matching for TextNode", str(context.exception))
 
 
@@ -709,6 +717,301 @@ def example():
         result = block_to_block_type(markdown)
         expected = BlockType.PARAGRAPH
         self.assertEqual(result, expected)
+
+
+class TestBlockToHtmlHeadingNode(unittest.TestCase):
+    def test_block_to_html_heading_node(self):
+        result = block_to_html_heading_node("# Title level 1")
+        expected = "<h1>Title level 1</h1>"
+        self.assertEqual(result.to_html(), expected)
+
+        result = block_to_html_heading_node("## Title level 2")
+        expected = "<h2>Title level 2</h2>"
+        self.assertEqual(result.to_html(), expected)
+
+        result = block_to_html_heading_node("### Title level 3")
+        expected = "<h3>Title level 3</h3>"
+        self.assertEqual(result.to_html(), expected)
+
+        result = block_to_html_heading_node("#### Title level 4")
+        expected = "<h4>Title level 4</h4>"
+        self.assertEqual(result.to_html(), expected)
+
+        result = block_to_html_heading_node("##### Title level 5")
+        expected = "<h5>Title level 5</h5>"
+        self.assertEqual(result.to_html(), expected)
+
+        result = block_to_html_heading_node("###### Title level 6")
+        expected = "<h6>Title level 6</h6>"
+        self.assertEqual(result.to_html(), expected)
+
+    def test_block_to_html_heading_node_with_bold(self):
+        result = block_to_html_heading_node("# Title level 1 with **bold**")
+        expected = "<h1>Title level 1 with <b>bold</b></h1>"
+        self.assertEqual(result.to_html(), expected)
+
+    def test_block_to_html_heading_node_with_italic(self):
+        result = block_to_html_heading_node("# Title level 1 with _italic_")
+        expected = "<h1>Title level 1 with <i>italic</i></h1>"
+        self.assertEqual(result.to_html(), expected)
+
+    def test_block_to_html_heading_node_with_code(self):
+        result = block_to_html_heading_node("# Title level 1 with `code`")
+        expected = "<h1>Title level 1 with <code>code</code></h1>"
+        self.assertEqual(result.to_html(), expected)
+
+    def test_block_to_html_heading_node_with_link(self):
+        result = block_to_html_heading_node(
+            "# Title level 1 with a [link](https://boot.dev)"
+        )
+        expected = '<h1>Title level 1 with a <a href="https://boot.dev">link</a></h1>'
+        self.assertEqual(result.to_html(), expected)
+
+
+class TestBlockToHtmlCodeNode(unittest.TestCase):
+    def test_block_to_html_code_node(self):
+        markdown = """\
+```
+def hello():
+    print("hello")
+
+def world():
+    print("world")
+```
+"""
+        result = block_to_html_code_node(markdown)
+        expected = '<pre><code>def hello():\n    print("hello")\n\ndef world():\n    print("world")\n</code></pre>'
+        self.assertEqual(result.to_html(), expected)
+
+    def test_block_to_html_code_node_dont_inline(self):
+        markdown = """\
+```
+This is a line with a **bold** word
+This is a line with an _italic_ word
+This is a line with a `code` word
+This is a line with an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg)
+This is a line with a [link](https://boot.dev) at the end
+```
+"""
+        result = block_to_html_code_node(markdown)
+        expected = """<pre><code>\
+This is a line with a **bold** word
+This is a line with an _italic_ word
+This is a line with a `code` word
+This is a line with an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg)
+This is a line with a [link](https://boot.dev) at the end
+</code></pre>\
+"""
+        self.assertEqual(result.to_html(), expected)
+
+
+class TestBlockToHtmlQuoteNode(unittest.TestCase):
+    def test_block_to_html_quote_node_single_line(self):
+        markdown = """\
+> This is a quote
+"""
+        result = block_to_html_quote_node(markdown)
+        expected = "<blockquote><p>This is a quote</p></blockquote>"
+        self.assertEqual(result.to_html(), expected)
+
+    def test_block_to_html_quote_node_multi_lines(self):
+        markdown = """\
+> This is a
+> multilines
+> quote
+"""
+        result = block_to_html_quote_node(markdown)
+        expected = "<blockquote><p>This is a multilines quote</p></blockquote>"
+        self.assertEqual(result.to_html(), expected)
+
+    @unittest.skip("what behavior do I want?")
+    def test_block_to_html_quote_node_empty_line(self):
+        markdown = """\
+> This is a quote with an empty line in between
+>
+> This is a quote with an empty line in between
+"""
+        result = block_to_html_quote_node(markdown)
+        expected = "<blockquote><p>This is a quote with an empty line in between\nThis is a quote with an empty line in between</p></blockquote>"
+        self.assertEqual(result.to_html(), expected)
+
+    def test_block_to_html_quote_node_with_inline(self):
+        markdown = """\
+> This is a line with a **bold** word
+> This is a line with an _italic_ word
+> This is a line with a `code` word
+> This is a line with an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg)
+> This is a line with a [link](https://boot.dev) at the end
+"""
+        result = block_to_html_quote_node(markdown)
+        expected = """\
+<blockquote><p>\
+This is a line with a <b>bold</b> word \
+This is a line with an <i>italic</i> word \
+This is a line with a <code>code</code> word \
+This is a line with an <img alt="obi wan image" src="https://i.imgur.com/fJRm4Vk.jpeg" /> \
+This is a line with a <a href="https://boot.dev">link</a> at the end\
+</p></blockquote>\
+"""
+        self.maxDiff = None  # pyright: ignore[reportUnannotatedClassAttribute]
+        self.assertEqual(result.to_html(), expected)
+
+
+class TestBlockToHtmlUnorderedListNode(unittest.TestCase):
+    def test_block_to_html_unordered_list(self):
+        markdown = """\
+- item 1
+- item 2
+- item 3
+"""
+        result = block_to_html_unordered_list_node(markdown)
+        expected = "<ul><li>item 1</li><li>item 2</li><li>item 3</li></ul>"
+        self.assertEqual(result.to_html(), expected)
+
+    def test_block_to_html_unordered_list_only_one(self):
+        markdown = """\
+- item
+"""
+        result = block_to_html_unordered_list_node(markdown)
+        expected = "<ul><li>item</li></ul>"
+        self.assertEqual(result.to_html(), expected)
+
+    def test_block_to_html_unordered_list_node_with_inline(self):
+        markdown = """\
+- This is a line with a **bold** word
+- This is a line with an _italic_ word
+- This is a line with a `code` word
+- This is a line with an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg)
+- This is a line with a [link](https://boot.dev) at the end
+"""
+        result = block_to_html_unordered_list_node(markdown)
+        expected = """\
+<ul>\
+<li>This is a line with a <b>bold</b> word</li>\
+<li>This is a line with an <i>italic</i> word</li>\
+<li>This is a line with a <code>code</code> word</li>\
+<li>This is a line with an <img alt="obi wan image" src="https://i.imgur.com/fJRm4Vk.jpeg" /></li>\
+<li>This is a line with a <a href="https://boot.dev">link</a> at the end</li>\
+</ul>\
+"""
+        self.maxDiff = None  # pyright: ignore[reportUnannotatedClassAttribute]
+        self.assertEqual(result.to_html(), expected)
+
+
+class TestBlockToHtmlOrderedListNode(unittest.TestCase):
+    def test_block_to_html_ordered_list(self):
+        markdown = """\
+1. item 1
+2. item 2
+3. item 3
+"""
+        result = block_to_html_ordered_list_node(markdown)
+        expected = "<ol><li>item 1</li><li>item 2</li><li>item 3</li></ol>"
+        self.assertEqual(result.to_html(), expected)
+
+    def test_block_to_html_ordered_list_only_one(self):
+        markdown = """\
+1. item
+"""
+        result = block_to_html_ordered_list_node(markdown)
+        expected = "<ol><li>item</li></ol>"
+        self.assertEqual(result.to_html(), expected)
+
+    def test_block_to_html_ordered_list_node_with_inline(self):
+        markdown = """\
+1. This is a line with a **bold** word
+2. This is a line with an _italic_ word
+3. This is a line with a `code` word
+4. This is a line with an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg)
+5. This is a line with a [link](https://boot.dev) at the end
+"""
+        result = block_to_html_ordered_list_node(markdown)
+        expected = """\
+<ol>\
+<li>This is a line with a <b>bold</b> word</li>\
+<li>This is a line with an <i>italic</i> word</li>\
+<li>This is a line with a <code>code</code> word</li>\
+<li>This is a line with an <img alt="obi wan image" src="https://i.imgur.com/fJRm4Vk.jpeg" /></li>\
+<li>This is a line with a <a href="https://boot.dev">link</a> at the end</li>\
+</ol>\
+"""
+        self.maxDiff = None  # pyright: ignore[reportUnannotatedClassAttribute]
+        self.assertEqual(result.to_html(), expected)
+
+
+class TestBlockToHtmlParagraphNode(unittest.TestCase):
+    def test_block_to_html_paragraph_single_line(self):
+        markdown = """\
+single line
+"""
+        result = block_to_html_paragraph_node(markdown)
+        expected = "<p>single line</p>"
+        self.assertEqual(result.to_html(), expected)
+
+    def test_block_to_html_paragraph_multi_line(self):
+        markdown = """\
+multilines
+paragraph
+hello world and good morning!
+"""
+        result = block_to_html_paragraph_node(markdown)
+        expected = "<p>multilines paragraph hello world and good morning!</p>"
+        self.assertEqual(result.to_html(), expected)
+
+    def test_block_to_html_paragraph_with_inline_markdown(self):
+        markdown = """\
+This is a line with a **bold** word
+This is a line with an _italic_ word
+This is a line with a `code` word
+This is a line with an ![obi wan image](https://i.imgur.com/fJRm4Vk.jpeg)
+This is a line with a [link](https://boot.dev) at the end
+"""
+        result = block_to_html_paragraph_node(markdown)
+        expected = "<p>"
+        expected += "This is a line with a <b>bold</b> word"
+        expected += " This is a line with an <i>italic</i> word"
+        expected += " This is a line with a <code>code</code> word"
+        expected += ' This is a line with an <img alt="obi wan image" src="https://i.imgur.com/fJRm4Vk.jpeg" />'
+        expected += (
+            ' This is a line with a <a href="https://boot.dev">link</a> at the end'
+        )
+        expected += "</p>"
+        self.maxDiff = None  # pyright: ignore[reportUnannotatedClassAttribute]
+        self.assertEqual(result.to_html(), expected)
+
+
+class TestMarkdownToHtmlBlocks(unittest.TestCase):
+    def test_bootdev_paragraphs(self):
+        md = """
+This is **bolded** paragraph
+text in a p
+tag here
+
+This is another paragraph with _italic_ text and `code` here
+
+"""
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><p>This is <b>bolded</b> paragraph text in a p tag here</p><p>This is another paragraph with <i>italic</i> text and <code>code</code> here</p></div>",
+        )
+
+    def test_bootdev_codeblock(self):
+        md = """
+```
+This is text that _should_ remain
+the **same** even with inline stuff
+```
+"""
+
+        node = markdown_to_html_node(md)
+        html = node.to_html()
+        self.assertEqual(
+            html,
+            "<div><pre><code>This is text that _should_ remain\nthe **same** even with inline stuff\n</code></pre></div>",
+        )
 
 
 if __name__ == "__main__":

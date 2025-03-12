@@ -34,4 +34,6 @@ props={self.props})"""
 
     def props_to_html(self) -> str:
         props = self.props or {}
-        return reduce(lambda acc, p: acc + f' {p[0]}="{p[1]}"', props.items(), "")
+        return reduce(
+            lambda acc, p: acc + f' {p[0]}="{p[1]}"', props.items(), ""
+        ).strip()
